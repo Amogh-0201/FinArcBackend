@@ -1,3 +1,9 @@
 spring:
   application:
     name: FinArc
+  profiles:
+    active: local    # Tells Spring to look for and load application-local.yaml
+  mongodb:
+    uri: ${MONGO_URI}    # Injected from application-local.yaml
+server:
+  port: 3000
