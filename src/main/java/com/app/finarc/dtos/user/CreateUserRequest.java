@@ -1,4 +1,4 @@
-package com.app.finarc.dtos;
+package com.app.finarc.dtos.user;
 
 
 import jakarta.validation.constraints.Email;

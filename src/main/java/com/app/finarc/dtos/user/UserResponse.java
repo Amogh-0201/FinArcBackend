@@ -1,10 +1,12 @@
-package com.app.finarc.dtos;
+package com.app.finarc.dtos.user;
 
 
 import lombok.*;
 
 @Getter
 @Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class UserResponse {
 
     private String id;

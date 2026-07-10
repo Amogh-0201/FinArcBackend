@@ -1,12 +1,10 @@
 package com.app.finarc.controllers;
 
 
-import com.app.finarc.dtos.CreateUserRequest;
-import com.app.finarc.dtos.ExceptionDto;
-import com.app.finarc.dtos.LoginUserRequest;
-import com.app.finarc.dtos.UserResponse;
+import com.app.finarc.dtos.user.*;
 import com.app.finarc.services.UserService;
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -20,9 +18,11 @@ import java.net.URI;
 public class UserController {
 
     private final UserService userService;
+    private final ModelMapper modelMapper;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, ModelMapper modelMapper) {
         this.userService = userService;
+        this.modelMapper = modelMapper;
     }
 
     @PostMapping("")
@@ -30,13 +30,7 @@ public class UserController {
 
         var userEntity = userService.createUser(req);
 
-        UserResponse userResponse = UserResponse.builder()
-                .id(userEntity.getId())
-                .username(userEntity.getUsername())
-                .email(userEntity.getEmail())
-                .monthlyBudgetThreshold(userEntity.getMonthlyBudgetThreshold())
-                .currency(userEntity.getCurrency())
-                .build();
+        UserResponse userResponse = modelMapper.map(userEntity, UserResponse.class);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -52,24 +46,52 @@ public class UserController {
 
         var userEntity = userService.loginUser(req);
 
-        UserResponse userResponse = UserResponse.builder()
-                .id(userEntity.getId())
-                .username(userEntity.getUsername())
-                .email(userEntity.getEmail())
-                .monthlyBudgetThreshold(userEntity.getMonthlyBudgetThreshold())
-                .currency(userEntity.getCurrency())
-                .build();
+        UserResponse userResponse = modelMapper.map(userEntity, UserResponse.class);
 
         return ResponseEntity.ok(userResponse);
     }
 
+    @PatchMapping("/{userId}")
+    public ResponseEntity<UserResponse> updateUser (
+            @PathVariable String userId,
+            @RequestBody UpdateUserRequest req
+    ) throws UserService.UserNotFoundException, UserService.ValidationException {
+
+        var userEntity = userService.updateUser(req, userId);
+
+        UserResponse userResponse = modelMapper.map(userEntity, UserResponse.class);
+
+        return ResponseEntity.ok(userResponse);
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserResponse> getUser (@PathVariable String userId) throws UserService.UserNotFoundException {
+
+        var userEntity = userService.getUser(userId);
+
+        UserResponse userResponse = modelMapper.map(userEntity, UserResponse.class);
+
+        return ResponseEntity.ok(userResponse);
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<DeleteUserResponse> deleteUser(@PathVariable String userId) throws UserService.UserNotFoundException {
+
+        userService.deleteUser(userId);
+        DeleteUserResponse deleteUserResponse = new DeleteUserResponse();
+        deleteUserResponse.setMessage("Successfully deleted the user");
+        return ResponseEntity.ok(deleteUserResponse);
+    }
 
     @ExceptionHandler
     public ResponseEntity<ExceptionDto> handleException(Exception e) {
         String message;
         HttpStatus statusCode;
 
-        if(e instanceof UserService.UserAlreadyExistsException) {
+        if( e instanceof UserService.UserNotFoundException ||
+                e instanceof UserService.UserAlreadyExistsException ||
+                e instanceof UserService.ValidationException
+        ) {
 
             message = e.getMessage();
             statusCode = HttpStatus.BAD_REQUEST;
@@ -82,11 +104,13 @@ public class UserController {
             statusCode = HttpStatus.BAD_REQUEST;
 
         } else if (e instanceof UserService.InvalidCredentialsException) {
+
             message = e.getMessage();
             statusCode = HttpStatus.UNAUTHORIZED;
+
         } else {
 
-            message = "Unknown Error Occurred";
+            message = e.getMessage();
             statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 

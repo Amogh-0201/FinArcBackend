@@ -50,7 +50,7 @@ Stores every individual expense logged by the user.
   "email": "String",
   "password": "String",
   "monthlyBudgetThreshold (Optional)": "Double",
-  "Currency (Optional)": "INR | USD | Other etc"
+  "currency (Optional)": "INR | USD | Other etc"
 }
 ```
 
@@ -72,9 +72,9 @@ Stores every individual expense logged by the user.
 ##### request JSON body
 ```json
 {
-  "username": "String",
+  "username (Optional)": "String",
   "monthlyBudgetThreshold (Optional)": "Double",
-  "Currency (Optional)": "INR | USD | Other etc"
+  "currency (Optional)": "INR | USD | Other etc"
 }
 ```
 
