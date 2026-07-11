@@ -1,9 +1,6 @@
 package com.app.finarc.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "transactions")
@@ -27,7 +25,7 @@ public class Transaction {
     private Double amount;
 
     @NonNull
-    private String category; // Food, Shopping, Travel, Bills, etc.
+    private String category; // TODO: make different pre made categories Food, Shopping, Travel, Bills, etc.
 
     private String description;
 
@@ -35,6 +33,6 @@ public class Transaction {
     private Instant timestamp;
 
     @NonNull
-    private String source; // MANUAL | SMS
+    private String source; // TODO: set only these two options MANUAL | SMS
 
 }

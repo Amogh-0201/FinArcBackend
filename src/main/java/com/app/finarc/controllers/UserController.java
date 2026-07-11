@@ -1,6 +1,7 @@
 package com.app.finarc.controllers;
 
 
+import com.app.finarc.dtos.common.ExceptionDto;
 import com.app.finarc.dtos.user.*;
 import com.app.finarc.services.UserService;
 import jakarta.validation.Valid;

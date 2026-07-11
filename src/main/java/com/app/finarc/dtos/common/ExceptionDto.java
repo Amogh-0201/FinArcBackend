@@ -1,4 +1,4 @@
-package com.app.finarc.dtos.user;
+package com.app.finarc.dtos.common;
 
 import lombok.Data;
 
