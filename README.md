@@ -117,7 +117,39 @@ Stores every individual expense logged by the user.
     DELETE /api/transactions/{transactionId}
 
 ### 10. Get all Transactions for a particular user (pagination - 20 at a time sorted by recent date)
-    GET /api/transactions/users/{userId}
+    GET /api/transactions/users/{userId}?page=2
+##### response json
+
+```json
+{
+    "content": [
+        {
+            "id": "6a52011b6db66896b459c181",
+            "userId": "6a4ff6886dfe0fc90d2b6594",
+            "amount": 550.5,
+            "category": "EDUCATION",
+            "description": "4th semester exam fees",
+            "timestamp": "2026-08-10T16:30:00Z",
+            "source": "MANUAL"
+        },
+        {
+            "id": "6a5205a9e4e9297e34856f66",
+            "userId": "6a4ff6886dfe0fc90d2b6594",
+            "amount": 150.0,
+            "category": "FOOD_AND_DINING",
+            "description": "Lunch",
+            "timestamp": "2026-07-12T16:30:00Z",
+            "source": "MANUAL"
+        }
+    ],
+    "page": {
+        "size": 20,
+        "number": 0,
+        "totalElements": 2,
+        "totalPages": 1
+    }
+}
+```
 
 ### 11. Get Current Month Stats Summary
     GET /api/transactions/users/{userId}/stats
@@ -164,3 +196,25 @@ Stores every individual expense logged by the user.
 
 ### 14. Fetch Predictive Analysis (Not now)
     GET /api/analytics/{userId}/predict
+
+---
+## Important points:
+### Allowed Transaction Categories
+```
+    FOOD_AND_DINING,        // Groceries, Restaurants, Cafés, Delivery
+    SHOPPING,               // Apparel, Electronics, Accessories, Cosmetics
+    TRAVEL_AND_TRANSPORT,   // Fuel, Public Transit, Cabs, Flights, Parking
+    BILLS_AND_UTILITIES,    // Rent, Electricity, Water, Internet, Phone, Subscriptions
+    ENTERTAINMENT,          // Movies, Concerts, Gaming, Hobbies, Events
+    HEALTH_AND_MEDICAL,     // Pharmacy, Doctor visits, Gym memberships, Insurance
+    EDUCATION,              // Tuition, Courses, Books, Certifications
+    INVESTMENT_AND_SAVING,  // Stocks, Crypto, Mutual Funds, Savings deposits
+    SALARY_AND_INCOME,      // Paychecks, Freelance work, Cash gifts
+    OTHER                   // Generalized fallback for anything else
+```
+
+### Allowed Transaction sources
+```
+    MANUAL, 
+    SMS
+```

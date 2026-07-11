@@ -1,6 +1,7 @@
 package com.app.finarc.dtos.transaction;
 
 
+import com.app.finarc.models.TransactionCategory;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +14,7 @@ public class UpdateTransactionRequest {
 
     private Double amount;
 
-    private String category;
+    private TransactionCategory category;
 
     private String description;
 }

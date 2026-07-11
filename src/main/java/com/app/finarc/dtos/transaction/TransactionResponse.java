@@ -1,6 +1,8 @@
 package com.app.finarc.dtos.transaction;
 
 
+import com.app.finarc.models.TransactionCategory;
+import com.app.finarc.models.TransactionSource;
 import lombok.*;
 
 import java.time.Instant;
@@ -17,11 +19,11 @@ public class TransactionResponse {
 
     private Double amount;
 
-    private String category;
+    private TransactionCategory category;
 
     private String description;
 
     private Instant timestamp;
 
-    private String source;
+    private TransactionSource source;
 }

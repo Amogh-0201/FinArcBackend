@@ -25,7 +25,7 @@ public class Transaction {
     private Double amount;
 
     @NonNull
-    private String category; // TODO: make different pre made categories Food, Shopping, Travel, Bills, etc.
+    private TransactionCategory category;
 
     private String description;
 
@@ -33,6 +33,6 @@ public class Transaction {
     private Instant timestamp;
 
     @NonNull
-    private String source; // TODO: set only these two options MANUAL | SMS
+    private TransactionSource source;
 
 }

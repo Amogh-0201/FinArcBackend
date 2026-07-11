@@ -8,8 +8,13 @@ import com.app.finarc.models.User;
 import com.app.finarc.repositories.TransactionRepository;
 import com.app.finarc.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -81,6 +86,23 @@ public class TransactionService {
         }
 
         transactionRepository.delete(transaction.get());
+    }
+
+
+    public Page<Transaction> getUserTransactions(String userId, int pageNumber) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new UserService.UserNotFoundException("User not found, invalid user id: " + userId)
+                );
+
+        Pageable pageable = PageRequest.of(
+                pageNumber,
+                20,
+                Sort.by(Sort.Direction.DESC, "timestamp")
+        );
+
+        return transactionRepository.findByUserId(user.getId(), pageable);
     }
 
 

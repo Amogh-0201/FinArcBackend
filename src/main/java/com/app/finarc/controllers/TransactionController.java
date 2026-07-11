@@ -11,6 +11,7 @@ import com.app.finarc.services.TransactionService;
 import com.app.finarc.services.UserService;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -75,6 +76,21 @@ public class TransactionController {
 
         DeleteTransactionResponse response = new DeleteTransactionResponse();
         response.setMessage("Transaction has been deleted successfully");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<Page<TransactionResponse>> getUserTransactions (
+            @PathVariable String userId,
+            @RequestParam(defaultValue = "0") int pageNumber
+    ) {
+
+        Page<Transaction> transactionPage = transactionService.getUserTransactions(userId, pageNumber);
+
+        Page<TransactionResponse> response = transactionPage.map( transaction ->
+            modelMapper.map(transaction, TransactionResponse.class)
+        );
 
         return ResponseEntity.ok(response);
     }

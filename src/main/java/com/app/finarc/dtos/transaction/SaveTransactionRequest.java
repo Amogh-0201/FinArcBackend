@@ -1,6 +1,8 @@
 package com.app.finarc.dtos.transaction;
 
 
+import com.app.finarc.models.TransactionCategory;
+import com.app.finarc.models.TransactionSource;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
@@ -22,8 +24,8 @@ public class SaveTransactionRequest {
     @NotNull(message = "Please provide the amount")
     private Double amount;
 
-    @NotBlank(message = "Category cannot be blank")
-    private String category;
+    @NotNull(message = "Category cannot be blank")
+    private TransactionCategory category;
 
     @Nullable
     private String description;
@@ -31,6 +33,6 @@ public class SaveTransactionRequest {
     @NotNull(message = "Timestamp is needed")
     private Instant timestamp;
 
-    @NotBlank(message = "Source can not be blank")
-    private String source;
+    @NotNull(message = "Source can not be blank")
+    private TransactionSource source;
 }
