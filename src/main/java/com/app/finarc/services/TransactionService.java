@@ -1,21 +1,27 @@
 package com.app.finarc.services;
 
 
-import com.app.finarc.dtos.transaction.SaveTransactionRequest;
-import com.app.finarc.dtos.transaction.UpdateTransactionRequest;
+import com.app.finarc.dtos.transaction.*;
 import com.app.finarc.models.Transaction;
+import com.app.finarc.models.TransactionCategory;
 import com.app.finarc.models.User;
 import com.app.finarc.repositories.TransactionRepository;
 import com.app.finarc.repositories.UserRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
@@ -72,6 +78,9 @@ public class TransactionService {
         if(req.getDescription() != null) {
             transaction.setDescription(req.getDescription());
         }
+        if(req.getTimestamp() != null) {
+            transaction.setTimestamp(req.getTimestamp());
+        }
 
         return transactionRepository.save(transaction);
     }
@@ -103,6 +112,136 @@ public class TransactionService {
         );
 
         return transactionRepository.findByUserId(user.getId(), pageable);
+    }
+
+
+    public MonthStatsSummaryResponse getCurrentMonthStats(String userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new UserService.UserNotFoundException("User not found, invalid user id: " + userId)
+                );
+
+        Instant startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        Instant now = Instant.now();
+
+        List<Transaction> transactions = transactionRepository.findByUserIdAndTimestampBetween(user.getId(), startOfMonth, now);
+
+        Double totalSpent = transactions.stream()
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+
+        Map<TransactionCategory, Double> breakdown = transactions.stream()
+                .collect(Collectors.groupingBy(
+                   Transaction::getCategory,
+                        Collectors.summingDouble(Transaction::getAmount)
+                ));
+
+        return MonthStatsSummaryResponse.builder()
+                .totalSpentThisMonth(totalSpent)
+                .budgetThreshold(user.getMonthlyBudgetThreshold())
+                .categoryBreakdown(breakdown)
+                .build();
+    }
+
+
+    public List<MonthTransactionHistoryResponse> getMonthTransactionHistory(String userId, int month, int year) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new UserService.UserNotFoundException("User not found, invalid user id: " + userId)
+                );
+
+        LocalDate startLocalDate = LocalDate.of(year, month, 1);
+        int lengthOfMonth = startLocalDate.lengthOfMonth();
+        LocalDate endLocalDate = LocalDate.of(year, month, lengthOfMonth);
+
+        Instant startInstant = startLocalDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant endInstant = endLocalDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant();
+
+        List<Transaction> transactions = transactionRepository.findByUserIdAndTimestampBetween(user.getId(), startInstant, endInstant);
+
+        Map<LocalDate, Double> spendingPerDay = transactions.stream()
+                .collect(Collectors.groupingBy(
+                   t -> t.getTimestamp().atZone(ZoneOffset.UTC).toLocalDate(),
+                        Collectors.summingDouble(Transaction::getAmount)
+                ));
+
+        List<MonthTransactionHistoryResponse> history = new ArrayList<>();
+
+        for(int day = 1; day<=lengthOfMonth; day++) {
+            LocalDate currentDate = LocalDate.of(year, month, day);
+            Double totalSpent = spendingPerDay.getOrDefault(currentDate, 0.0);
+
+            history.add(MonthTransactionHistoryResponse.builder()
+                    .date(currentDate)
+                    .totalSpent(totalSpent)
+                    .build());
+        }
+
+        return history;
+    }
+
+
+    public DayStatsSummaryResponse getDayStats(String userId, int year, int month, int day) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new UserService.UserNotFoundException("User not found, invalid user id: " + userId)
+                );
+
+        LocalDate targetDate = LocalDate.of(year, month, day);
+        Instant startOfDay = targetDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant endOfDay = targetDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant();
+
+        List<Transaction> transactions = transactionRepository.findByUserIdAndTimestampBetween(user.getId(), startOfDay, endOfDay);
+
+        Double totalSpent = transactions.stream()
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+
+        Map<TransactionCategory, Double> breakDown = transactions.stream()
+                .collect(Collectors.groupingBy(
+                   Transaction::getCategory,
+                   Collectors.summingDouble(Transaction::getAmount)
+                ));
+
+        return DayStatsSummaryResponse.builder()
+                .totalSpentThatDay(totalSpent)
+                .categoryBreakdown(breakDown)
+                .build();
+    }
+
+
+    public DayTransactionDetailsResponse getDayTransactionDetail(String userId, int year, int month, int day) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new UserService.UserNotFoundException("User not found, invalid user id: " + userId)
+                );
+
+        LocalDate targetDate = LocalDate.of(year, month, day);
+        Instant startOfDay = targetDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant endOfDay = targetDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant();
+
+        List<Transaction> transactions = transactionRepository.findByUserIdAndTimestampBetween(user.getId(), startOfDay, endOfDay);
+
+        List<TransactionResponse> mappedContent = transactions.stream()
+                .map(t -> TransactionResponse.builder()
+                        .id(t.getId())
+                        .userId(t.getUserId())
+                        .amount(t.getAmount())
+                        .category(t.getCategory())
+                        .description(t.getDescription())
+                        .timestamp(t.getTimestamp())
+                        .source(t.getSource())
+                        .build())
+                .toList();
+
+        return DayTransactionDetailsResponse.builder()
+                .content(mappedContent)
+                .date(targetDate)
+                .build();
     }
 
 

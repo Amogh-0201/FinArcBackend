@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -17,4 +19,6 @@ public class UpdateTransactionRequest {
     private TransactionCategory category;
 
     private String description;
+
+    private Instant timestamp;
 }

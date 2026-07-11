@@ -2,10 +2,7 @@ package com.app.finarc.controllers;
 
 
 import com.app.finarc.dtos.common.ExceptionDto;
-import com.app.finarc.dtos.transaction.DeleteTransactionResponse;
-import com.app.finarc.dtos.transaction.SaveTransactionRequest;
-import com.app.finarc.dtos.transaction.TransactionResponse;
-import com.app.finarc.dtos.transaction.UpdateTransactionRequest;
+import com.app.finarc.dtos.transaction.*;
 import com.app.finarc.models.Transaction;
 import com.app.finarc.services.TransactionService;
 import com.app.finarc.services.UserService;
@@ -19,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.DateTimeException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -95,6 +94,48 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/users/{userId}/stats")
+    public ResponseEntity<MonthStatsSummaryResponse> getCurrentMonthStats(@PathVariable String userId) {
+
+        MonthStatsSummaryResponse response = transactionService.getCurrentMonthStats(userId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users/{userId}/{year}/{month_no}")
+    public ResponseEntity<List<MonthTransactionHistoryResponse>> getMonthTransactionHistory(
+            @PathVariable String userId,
+            @PathVariable int year,
+            @PathVariable int month_no
+    ) {
+        List<MonthTransactionHistoryResponse> response = transactionService.getMonthTransactionHistory(userId, month_no, year);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users/{userId}/{year}/{month_no}/{day}/stats")
+    public ResponseEntity<DayStatsSummaryResponse> getDayStatsSummary(
+            @PathVariable String userId,
+            @PathVariable int year,
+            @PathVariable int month_no,
+            @PathVariable int day
+    ) {
+        DayStatsSummaryResponse response = transactionService.getDayStats(userId, year, month_no, day);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/users/{userId}/{year}/{month_no}/{day}")
+    public ResponseEntity<DayTransactionDetailsResponse> getDayTransactionDetails(
+            @PathVariable String userId,
+            @PathVariable int year,
+            @PathVariable int month_no,
+            @PathVariable int day
+    ) {
+        DayTransactionDetailsResponse response = transactionService.getDayTransactionDetail(userId, year, month_no, day);
+
+        return ResponseEntity.ok(response);
+    }
 
     @ExceptionHandler
     public ResponseEntity<ExceptionDto> handleException(Exception e) {
@@ -113,6 +154,11 @@ public class TransactionController {
             message = validEx.getBindingResult().getFieldErrors().stream()
                     .map(org.springframework.validation.FieldError::getDefaultMessage)
                     .collect(java.util.stream.Collectors.joining(", "));
+            statusCode = HttpStatus.BAD_REQUEST;
+
+        } else if(e instanceof DateTimeException) {
+
+            message = "invalid date or time format";
             statusCode = HttpStatus.BAD_REQUEST;
 
         } else {

@@ -38,6 +38,8 @@ Stores every individual expense logged by the user.
 
 ## 🔌API Endpoints Blueprint
 
+### N.P - API endpoints will change after implementing jwt authentication
+
 ---
 ### _<ins>User Related</ins>_
 
@@ -166,8 +168,8 @@ Stores every individual expense logged by the user.
 }
 ```
 
-### 12. Get Only particular Month's Transaction history for each date
-    GET /api/transactions/{userId}/{year}/{month_no}
+### 12. Get any particular Month's Transaction history for every date
+    GET /api/transactions/users/{userId}/{year}/{month_no}
 ##### JSON response for every date starting from the first date of the ongoing month
 ```json
 [
@@ -176,8 +178,8 @@ Stores every individual expense logged by the user.
 ]
 ```
 
-### 13. Get Transaction Info For A Particular Day
-    GET /api/transactions/{userId}/{year}/{month-no}/{day}
+### 13. Get Transaction Stats Summary For A Particular Day
+    GET /api/transactions/users/{userId}/{year}/{month_no}/{day}/stats
 ##### response JSON
 ```json
 {
@@ -190,11 +192,41 @@ Stores every individual expense logged by the user.
 }
 ```
 
+### 14. Get Transaction Details For A Particular Day
+    /api/transactions/users/{userId}/{year}/{month_no}/{day}
+##### response JSON
+```json
+{
+  "content": [
+    {
+      "id": "6a52011b6db66896b459c181",
+      "userId": "6a4ff6886dfe0fc90d2b6594",
+      "amount": 550.5,
+      "category": "EDUCATION",
+      "description": "4th semester exam fees",
+      "timestamp": "2026-07-10T16:30:00Z",
+      "source": "MANUAL"
+    },
+    {
+      "id": "6a5205a9e4e9297e34856f66",
+      "userId": "6a4ff6886dfe0fc90d2b6594",
+      "amount": 150.0,
+      "category": "FOOD_AND_DINING",
+      "description": "Lunch",
+      "timestamp": "2026-07-10T16:30:00Z",
+      "source": "MANUAL"
+    }
+  ],
+  "date": "2026-07-10"
+}
+```
+
+
 ---
 
 ### _<ins>AI ML Related</ins>_
 
-### 14. Fetch Predictive Analysis (Not now)
+### 15. Fetch Predictive Analysis (Not now)
     GET /api/analytics/{userId}/predict
 
 ---
