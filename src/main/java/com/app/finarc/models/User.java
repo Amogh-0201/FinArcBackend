@@ -33,7 +33,7 @@ public class User {
 
     private Double monthlyBudgetThreshold;
 
-    private String currency;  //TODO: need to create specific options like INR | USD etc
+    private Currency currency;
 
     @CreatedDate
     private Instant createdAt;

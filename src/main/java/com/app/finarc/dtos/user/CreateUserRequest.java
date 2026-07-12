@@ -1,6 +1,7 @@
 package com.app.finarc.dtos.user;
 
 
+import com.app.finarc.models.Currency;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -28,5 +29,5 @@ public class CreateUserRequest {
     private Double monthlyBudgetThreshold;
 
     @Nullable
-    private String currency;
+    private Currency currency;
 }

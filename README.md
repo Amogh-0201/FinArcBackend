@@ -245,6 +245,20 @@ Stores every individual expense logged by the user.
     OTHER                   // Generalized fallback for anything else
 ```
 
+### Allowed Currencies
+```
+    INR, // Indian Rupee
+    USD, // US Dollar
+    EUR, // Euro
+    GBP, // British Pound Sterling
+    AED, // UAE Dirham
+    SAR, // Saudi Riyal
+    CAD, // Canadian Dollar
+    AUD, // Australian Dollar
+    SGD, // Singapore Dollar
+    JPY  // Japanese Yen
+```
+
 ### Allowed Transaction sources
 ```
     MANUAL, 

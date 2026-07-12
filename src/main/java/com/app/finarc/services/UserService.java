@@ -6,6 +6,7 @@ import com.app.finarc.dtos.user.LoginUserRequest;
 import com.app.finarc.dtos.user.UpdateUserRequest;
 import com.app.finarc.models.User;
 import com.app.finarc.repositories.UserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -14,9 +15,11 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User createUser(CreateUserRequest req) {
@@ -31,9 +34,11 @@ public class UserService {
 
         var newUser = new User();
 
+        String hashedPassword = passwordEncoder.encode(req.getPassword());
+
         newUser.setUsername(req.getUsername());
         newUser.setEmail(req.getEmail());
-        newUser.setPassword(req.getPassword());  //TODO: hash the password
+        newUser.setPassword(hashedPassword);
         if(req.getMonthlyBudgetThreshold() != null) {
             newUser.setMonthlyBudgetThreshold(req.getMonthlyBudgetThreshold());
         }
@@ -50,7 +55,7 @@ public class UserService {
         User user = userRepository.findByUsername(req.getUsername())
                 .orElseThrow( () -> new InvalidCredentialsException("Invalid Credentials"));
 
-        boolean passwordMatches = user.getPassword().equals(req.getPassword());  //TODO: hashed password check logic
+        boolean passwordMatches = passwordEncoder.matches(req.getPassword(), user.getPassword());
         if(!passwordMatches) {
             throw new InvalidCredentialsException("Invalid Credentials!");
         }

@@ -1,6 +1,7 @@
 package com.app.finarc.dtos.user;
 
 
+import com.app.finarc.models.Currency;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,5 +16,5 @@ public class UpdateUserRequest {
 
     private Double monthlyBudgetThreshold;
 
-    private String currency;
+    private Currency currency;
 }
