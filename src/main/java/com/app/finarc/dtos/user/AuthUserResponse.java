@@ -4,10 +4,12 @@ package com.app.finarc.dtos.user;
 import lombok.*;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class UserResponse {
+public class AuthUserResponse {
+
+    private String token;
 
     private String username;
 

@@ -38,7 +38,7 @@ Stores every individual expense logged by the user.
 
 ## 🔌API Endpoints Blueprint
 
-### N.P - API endpoints will change after implementing jwt authentication
+### N.P - Implemented jwt authentication
 
 ---
 ### _<ins>User Related</ins>_
@@ -67,10 +67,10 @@ Stores every individual expense logged by the user.
 ```
 
 ###  3. Get Particular User Info
-    GET /api/users/{userId}
+    GET /api/users
 
 ### 4. Update User Info
-    PATCH api/users/{userId}
+    PATCH /api/users
 ##### request JSON body
 ```json
 {
@@ -81,7 +81,7 @@ Stores every individual expense logged by the user.
 ```
 
 ### 5. Delete User
-    DELETE api/users/{userId}
+    DELETE /api/users
 
 ---
 
@@ -92,7 +92,6 @@ Stores every individual expense logged by the user.
 ##### request JSON body
 ```json
 {
-  "userId": "String (References Users._id)",
   "amount": "Double",
   "category": "String (Food, Shopping, Travel, Bills, Entertainment, Other)",
   "description": "String",
@@ -119,7 +118,7 @@ Stores every individual expense logged by the user.
     DELETE /api/transactions/{transactionId}
 
 ### 10. Get all Transactions for a particular user (pagination - 20 at a time sorted by recent date)
-    GET /api/transactions/users/{userId}?page=2
+    GET /api/transactions/users?page=2
 ##### response json
 
 ```json
@@ -127,7 +126,6 @@ Stores every individual expense logged by the user.
     "content": [
         {
             "id": "6a52011b6db66896b459c181",
-            "userId": "6a4ff6886dfe0fc90d2b6594",
             "amount": 550.5,
             "category": "EDUCATION",
             "description": "4th semester exam fees",
@@ -136,7 +134,6 @@ Stores every individual expense logged by the user.
         },
         {
             "id": "6a5205a9e4e9297e34856f66",
-            "userId": "6a4ff6886dfe0fc90d2b6594",
             "amount": 150.0,
             "category": "FOOD_AND_DINING",
             "description": "Lunch",
@@ -154,7 +151,7 @@ Stores every individual expense logged by the user.
 ```
 
 ### 11. Get Current Month Stats Summary
-    GET /api/transactions/users/{userId}/stats
+    GET /api/transactions/users/stats
 ##### response JSON
 ```json
 {
@@ -169,7 +166,7 @@ Stores every individual expense logged by the user.
 ```
 
 ### 12. Get any particular Month's Transaction history for every date
-    GET /api/transactions/users/{userId}/{year}/{month_no}
+    GET /api/transactions/users/{year}/{month_no}
 ##### JSON response for every date starting from the first date of the ongoing month
 ```json
 [
@@ -179,7 +176,7 @@ Stores every individual expense logged by the user.
 ```
 
 ### 13. Get Transaction Stats Summary For A Particular Day
-    GET /api/transactions/users/{userId}/{year}/{month_no}/{day}/stats
+    GET /api/transactions/users/{year}/{month_no}/{day}/stats
 ##### response JSON
 ```json
 {
@@ -193,14 +190,13 @@ Stores every individual expense logged by the user.
 ```
 
 ### 14. Get Transaction Details For A Particular Day
-    /api/transactions/users/{userId}/{year}/{month_no}/{day}
+    /api/transactions/users/{year}/{month_no}/{day}
 ##### response JSON
 ```json
 {
   "content": [
     {
       "id": "6a52011b6db66896b459c181",
-      "userId": "6a4ff6886dfe0fc90d2b6594",
       "amount": 550.5,
       "category": "EDUCATION",
       "description": "4th semester exam fees",
@@ -209,7 +205,6 @@ Stores every individual expense logged by the user.
     },
     {
       "id": "6a5205a9e4e9297e34856f66",
-      "userId": "6a4ff6886dfe0fc90d2b6594",
       "amount": 150.0,
       "category": "FOOD_AND_DINING",
       "description": "Lunch",
@@ -227,7 +222,7 @@ Stores every individual expense logged by the user.
 ### _<ins>AI ML Related</ins>_
 
 ### 15. Fetch Predictive Analysis (Not now)
-    GET /api/analytics/{userId}/predict
+    GET /api/analytics/predict
 
 ---
 ## Important points:

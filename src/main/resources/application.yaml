@@ -7,3 +7,6 @@ spring:
     uri: ${MONGO_URI}    # Injected from application-local.yaml
 server:
   port: 3000
+app:
+  jwt:
+    secret: ${JWT_SECRET}

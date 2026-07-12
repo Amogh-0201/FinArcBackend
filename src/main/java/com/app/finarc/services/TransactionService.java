@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -33,9 +34,9 @@ public class TransactionService {
         this.userRepository = userRepository;
     }
 
-    public Transaction saveTransaction(SaveTransactionRequest req) {
+    public Transaction saveTransaction(SaveTransactionRequest req, String userId) {
 
-        Optional<User> user = userRepository.findById(req.getUserId());
+        Optional<User> user = userRepository.findById(userId);
         if(user.isEmpty()) {
             throw new UserService.UserNotFoundException("User not found, invalid user id");
         }
@@ -53,21 +54,31 @@ public class TransactionService {
     }
 
 
-    public Transaction getTransactionById(String transactionId) {
-
-        return transactionRepository.findById(transactionId)
-                .orElseThrow(() ->
-                        new TransactionNotFoundException("Transaction not found, invalid transaction id: " + transactionId)
-                );
-    }
-
-
-    public Transaction updateTransaction(UpdateTransactionRequest req, String transactionId) {
+    public Transaction getTransactionById(String transactionId, String userId) {
 
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() ->
                         new TransactionNotFoundException("Transaction not found, invalid transaction id: " + transactionId)
                 );
+
+        if (!transaction.getUserId().equals(userId)) {
+            throw new AccessDeniedException("Cannot access data! invalid ownership");
+        }
+
+        return transaction;
+    }
+
+
+    public Transaction updateTransaction(UpdateTransactionRequest req, String transactionId, String userId) {
+
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() ->
+                        new TransactionNotFoundException("Transaction not found, invalid transaction id: " + transactionId)
+                );
+
+        if (!transaction.getUserId().equals(userId)) {
+            throw new AccessDeniedException("Cannot access data! invalid ownership");
+        }
 
         if(req.getAmount() != null) {
             transaction.setAmount(req.getAmount());
@@ -86,12 +97,16 @@ public class TransactionService {
     }
 
 
-    public void deleteTransactionById(String transactionId) {
+    public void deleteTransactionById(String transactionId, String userId) {
 
         Optional<Transaction> transaction = transactionRepository.findById(transactionId);
 
         if(transaction.isEmpty()) {
             throw new TransactionNotFoundException("Transaction not found, invalid transaction id: " + transactionId);
+        }
+
+        if(!transaction.get().getUserId().equals(userId)) {
+            throw new AccessDeniedException("Cannot access data! invalid ownership");
         }
 
         transactionRepository.delete(transaction.get());
@@ -229,7 +244,6 @@ public class TransactionService {
         List<TransactionResponse> mappedContent = transactions.stream()
                 .map(t -> TransactionResponse.builder()
                         .id(t.getId())
-                        .userId(t.getUserId())
                         .amount(t.getAmount())
                         .category(t.getCategory())
                         .description(t.getDescription())

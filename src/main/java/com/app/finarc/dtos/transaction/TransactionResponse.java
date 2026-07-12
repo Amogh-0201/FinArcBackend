@@ -15,8 +15,6 @@ public class TransactionResponse {
 
     private String id;
 
-    private String userId;
-
     private Double amount;
 
     private TransactionCategory category;

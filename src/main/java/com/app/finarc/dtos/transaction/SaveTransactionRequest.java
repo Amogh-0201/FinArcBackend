@@ -18,9 +18,6 @@ import java.time.Instant;
 @AllArgsConstructor
 public class SaveTransactionRequest {
 
-    @NotBlank(message = "Please provide user id")
-    private String userId;
-
     @NotNull(message = "Please provide the amount")
     private Double amount;
 

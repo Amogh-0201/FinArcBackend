@@ -11,9 +11,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.security.access.AccessDeniedException;
+
 
 import java.net.URI;
 import java.time.DateTimeException;
@@ -31,9 +34,12 @@ public class TransactionController {
     }
 
     @PostMapping("")
-    public ResponseEntity<TransactionResponse> saveTransaction(@RequestBody @Valid SaveTransactionRequest req) {
+    public ResponseEntity<TransactionResponse> saveTransaction(
+            @RequestBody @Valid SaveTransactionRequest req,
+            @AuthenticationPrincipal String userId
+    ) {
 
-        Transaction transaction = transactionService.saveTransaction(req);
+        Transaction transaction = transactionService.saveTransaction(req, userId);
 
         TransactionResponse response = modelMapper.map(transaction, TransactionResponse.class);
 
@@ -47,9 +53,12 @@ public class TransactionController {
     }
 
     @GetMapping("/{transactionId}")
-    public ResponseEntity<TransactionResponse> getTransaction(@PathVariable String transactionId) {
+    public ResponseEntity<TransactionResponse> getTransaction(
+            @PathVariable String transactionId,
+            @AuthenticationPrincipal String userId
+    ) {
 
-        Transaction transaction = transactionService.getTransactionById(transactionId);
+        Transaction transaction = transactionService.getTransactionById(transactionId, userId);
 
         TransactionResponse response = modelMapper.map(transaction, TransactionResponse.class);
 
@@ -59,9 +68,10 @@ public class TransactionController {
     @PatchMapping("/{transactionId}")
     public ResponseEntity<TransactionResponse> updateTransaction(
             @PathVariable String transactionId,
-            @RequestBody @Valid UpdateTransactionRequest req
+            @RequestBody @Valid UpdateTransactionRequest req,
+            @AuthenticationPrincipal String userId
     ) {
-        Transaction transaction = transactionService.updateTransaction(req, transactionId);
+        Transaction transaction = transactionService.updateTransaction(req, transactionId, userId);
 
         TransactionResponse response = modelMapper.map(transaction, TransactionResponse.class);
 
@@ -69,9 +79,12 @@ public class TransactionController {
     }
 
     @DeleteMapping("/{transactionId}")
-    public ResponseEntity<DeleteTransactionResponse> deleteTransaction(@PathVariable String transactionId) {
+    public ResponseEntity<DeleteTransactionResponse> deleteTransaction(
+            @PathVariable String transactionId,
+            @AuthenticationPrincipal String userId
+    ) {
 
-        transactionService.deleteTransactionById(transactionId);
+        transactionService.deleteTransactionById(transactionId, userId);
 
         DeleteTransactionResponse response = new DeleteTransactionResponse();
         response.setMessage("Transaction has been deleted successfully");
@@ -79,9 +92,9 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/users/{userId}")
+    @GetMapping("/users")
     public ResponseEntity<Page<TransactionResponse>> getUserTransactions (
-            @PathVariable String userId,
+            @AuthenticationPrincipal  String userId,
             @RequestParam(defaultValue = "0") int pageNumber
     ) {
 
@@ -94,17 +107,17 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/users/{userId}/stats")
-    public ResponseEntity<MonthStatsSummaryResponse> getCurrentMonthStats(@PathVariable String userId) {
+    @GetMapping("/users/stats")
+    public ResponseEntity<MonthStatsSummaryResponse> getCurrentMonthStats(@AuthenticationPrincipal String userId) {
 
         MonthStatsSummaryResponse response = transactionService.getCurrentMonthStats(userId);
 
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/users/{userId}/{year}/{month_no}")
+    @GetMapping("/users/{year}/{month_no}")
     public ResponseEntity<List<MonthTransactionHistoryResponse>> getMonthTransactionHistory(
-            @PathVariable String userId,
+            @AuthenticationPrincipal String userId,
             @PathVariable int year,
             @PathVariable int month_no
     ) {
@@ -113,9 +126,9 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/users/{userId}/{year}/{month_no}/{day}/stats")
+    @GetMapping("/users/{year}/{month_no}/{day}/stats")
     public ResponseEntity<DayStatsSummaryResponse> getDayStatsSummary(
-            @PathVariable String userId,
+            @AuthenticationPrincipal String userId,
             @PathVariable int year,
             @PathVariable int month_no,
             @PathVariable int day
@@ -125,9 +138,9 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/users/{userId}/{year}/{month_no}/{day}")
+    @GetMapping("/users/{year}/{month_no}/{day}")
     public ResponseEntity<DayTransactionDetailsResponse> getDayTransactionDetails(
-            @PathVariable String userId,
+            @AuthenticationPrincipal String userId,
             @PathVariable int year,
             @PathVariable int month_no,
             @PathVariable int day
@@ -160,6 +173,11 @@ public class TransactionController {
 
             message = "invalid date or time format";
             statusCode = HttpStatus.BAD_REQUEST;
+
+        } else if(e instanceof AccessDeniedException) {
+
+            message = e.getMessage();
+            statusCode = HttpStatus.FORBIDDEN;
 
         } else {
             message = e.getMessage();
