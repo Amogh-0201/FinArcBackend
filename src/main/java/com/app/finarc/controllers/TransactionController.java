@@ -107,10 +107,14 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/users/stats")
-    public ResponseEntity<MonthStatsSummaryResponse> getCurrentMonthStats(@AuthenticationPrincipal String userId) {
+    @GetMapping("/users/{year}/{month_no}/stats")
+    public ResponseEntity<MonthStatsSummaryResponse> getCurrentMonthStats(
+            @AuthenticationPrincipal String userId,
+            @PathVariable int month_no,
+            @PathVariable int year
+    ) {
 
-        MonthStatsSummaryResponse response = transactionService.getCurrentMonthStats(userId);
+        MonthStatsSummaryResponse response = transactionService.getMonthStats(userId, year, month_no);
 
         return ResponseEntity.ok(response);
     }

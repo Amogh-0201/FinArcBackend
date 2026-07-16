@@ -14,10 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -130,17 +127,19 @@ public class TransactionService {
     }
 
 
-    public MonthStatsSummaryResponse getCurrentMonthStats(String userId) {
+    public MonthStatsSummaryResponse getMonthStats(String userId, int year, int month) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new UserService.UserNotFoundException("User not found, invalid user id: " + userId)
                 );
 
-        Instant startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay().toInstant(ZoneOffset.UTC);
-        Instant now = Instant.now();
+        YearMonth yearMonth = YearMonth.of(year, month);
 
-        List<Transaction> transactions = transactionRepository.findByUserIdAndTimestampBetween(user.getId(), startOfMonth, now);
+        Instant startOfMonth = yearMonth.atDay(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        Instant endOfMonth = yearMonth.atEndOfMonth().atTime(23, 59, 59, 999).toInstant(ZoneOffset.UTC);
+
+        List<Transaction> transactions = transactionRepository.findByUserIdAndTimestampBetween(user.getId(), startOfMonth, endOfMonth);
 
         Double totalSpent = transactions.stream()
                 .mapToDouble(Transaction::getAmount)
@@ -152,7 +151,10 @@ public class TransactionService {
                         Collectors.summingDouble(Transaction::getAmount)
                 ));
 
+        String monthPeriod = String.format("%d/%02d", year, month);
+
         return MonthStatsSummaryResponse.builder()
+                .month(monthPeriod)
                 .totalSpentThisMonth(totalSpent)
                 .budgetThreshold(user.getMonthlyBudgetThreshold())
                 .categoryBreakdown(breakdown)

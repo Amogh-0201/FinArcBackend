@@ -12,6 +12,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class MonthStatsSummaryResponse {
 
+    private String month;
+
     private Double totalSpentThisMonth;
 
     private Double budgetThreshold;

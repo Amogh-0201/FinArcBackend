@@ -151,10 +151,11 @@ Stores every individual expense logged by the user.
 ```
 
 ### 11. Get Current Month Stats Summary
-    GET /api/transactions/users/stats
+    GET /api/transactions/users/{year}/{month_no}/stats
 ##### response JSON
 ```json
 {
+  "month": "2026/07",
   "totalSpentThisMonth": 12450.00,
   "budgetThreshold": 50000.00,
   "categoryBreakdown": {
