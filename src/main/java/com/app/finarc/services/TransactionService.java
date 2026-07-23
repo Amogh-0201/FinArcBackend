@@ -199,6 +199,53 @@ public class TransactionService {
         return history;
     }
 
+    public List<MonthDailyStatsResponse> getMonthDailyStats(String userId, int month, int year) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new UserService.UserNotFoundException("User not found, invalid user id: " + userId)
+                );
+
+        LocalDate startLocalDate = LocalDate.of(year, month, 1);
+        int lengthOfMonth = startLocalDate.lengthOfMonth();
+        LocalDate endLocalDate = LocalDate.of(year, month, lengthOfMonth);
+
+        Instant startInstant = startLocalDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant endInstant = endLocalDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant();
+
+        List<Transaction> transactions = transactionRepository.findByUserIdAndTimestampBetween(user.getId(), startInstant, endInstant);
+
+        Map<LocalDate, List<Transaction>> transactionsByDate = transactions.stream()
+                .collect(Collectors.groupingBy(
+                        t -> t.getTimestamp().atZone(ZoneOffset.UTC).toLocalDate()
+                ));
+
+        List<MonthDailyStatsResponse> historyStats = new ArrayList<>();
+
+        for (int day = 1; day <= lengthOfMonth; day++) {
+            LocalDate currentDate = LocalDate.of(year, month, day);
+            List<Transaction> dayTransactions = transactionsByDate.getOrDefault(currentDate, List.of());
+
+            Double totalSpentThatDay = dayTransactions.stream()
+                    .mapToDouble(Transaction::getAmount)
+                    .sum();
+
+            Map<TransactionCategory, Double> categoryBreakdown = dayTransactions.stream()
+                    .collect(Collectors.groupingBy(
+                            Transaction::getCategory,
+                            Collectors.summingDouble(Transaction::getAmount)
+                    ));
+
+            historyStats.add(MonthDailyStatsResponse.builder()
+                    .date(currentDate)
+                    .totalSpentThatDay(totalSpentThatDay)
+                    .categoryBreakdown(categoryBreakdown)
+                    .build());
+        }
+
+        return historyStats;
+    }
+
 
     public DayStatsSummaryResponse getDayStats(String userId, int year, int month, int day) {
 

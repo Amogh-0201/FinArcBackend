@@ -176,7 +176,35 @@ Stores every individual expense logged by the user.
 ]
 ```
 
-### 13. Get Transaction Stats Summary For A Particular Day
+### 13. Get Current Month's Daily Transaction Stats
+    GET /api/transactions/users/{year}/{month}/daily-stats
+##### JSON response
+```json
+[
+  {
+    "date": "2026-07-01",
+    "totalSpentThatDay": 450.0,
+    "categoryBreakdown": {
+      "FOOD_AND_DINING": 300.0,
+      "TRAVEL_AND_TRANSPORT": 150.0
+    }
+  },
+  {
+    "date": "2026-07-02",
+    "totalSpentThatDay": 0.0,
+    "categoryBreakdown": {}
+  },
+  {
+    "date": "2026-07-03",
+    "totalSpentThatDay": 1200.0,
+    "categoryBreakdown": {
+      "SHOPPING": 1200.0
+    }
+  }
+]
+```
+
+### 14. Get Transaction Stats Summary For A Particular Day
     GET /api/transactions/users/{year}/{month_no}/{day}/stats
 ##### response JSON
 ```json
@@ -190,7 +218,7 @@ Stores every individual expense logged by the user.
 }
 ```
 
-### 14. Get Transaction Details For A Particular Day
+### 15. Get Transaction Details For A Particular Day
     /api/transactions/users/{year}/{month_no}/{day}
 ##### response JSON
 ```json
@@ -222,7 +250,7 @@ Stores every individual expense logged by the user.
 
 ### _<ins>AI ML Related</ins>_
 
-### 15. Fetch Predictive Analysis (Not now)
+### 16. Fetch Predictive Analysis (Not now)
     GET /api/analytics/predict
 
 ---

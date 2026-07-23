@@ -130,6 +130,17 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/users/{year}/{month_no}/daily-stats")
+    public ResponseEntity<List<MonthDailyStatsResponse>> getMonthDailyStats(
+            @AuthenticationPrincipal String userId,
+            @PathVariable int year,
+            @PathVariable int month_no
+    ) {
+        List<MonthDailyStatsResponse> response = transactionService.getMonthDailyStats(userId, month_no, year);
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/users/{year}/{month_no}/{day}/stats")
     public ResponseEntity<DayStatsSummaryResponse> getDayStatsSummary(
             @AuthenticationPrincipal String userId,
